@@ -102,6 +102,12 @@ arb_div_newton(arb_t res, const arb_t x, const arb_t y, slong prec)
 {
     mag_t zr, xm, ym, yl, yw;
 
+    if (arb_is_zero(x) && arb_is_finite(y))
+    {
+        arb_zero(res);
+        return;
+    }
+
     if (arf_is_special(arb_midref(x)) || arf_is_special(arb_midref(y)))
     {
         arb_indeterminate(res);
