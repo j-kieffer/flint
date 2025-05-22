@@ -404,6 +404,10 @@ acb_theta_ql_perform_steps(acb_ptr th, acb_ptr th_init, acb_srcptr rts,
     {
         aux = _acb_vec_init(n * n);
     }
+    else
+    {
+        aux = NULL;
+    }
 
     for (k = nb_steps - 1; k >= 0; k--)
     {
@@ -522,6 +526,10 @@ acb_theta_ql_exact_steps(acb_ptr th, acb_srcptr zs, slong nb,
     if (all)
     {
         rts_all = _acb_vec_init(nb * n * n);
+    }
+    else
+    {
+        rts_all = NULL;
     }
 
     res = acb_theta_ql_setup(rts, rts_all, t, &guard, easy_steps, zs, nb, tau, distances,
