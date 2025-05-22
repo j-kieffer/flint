@@ -13,7 +13,6 @@
 #include "arb_mat.h"
 #include "acb_theta.h"
 
-#define ACB_THETA_ELD_MAX_PTS 10000000
 #define ACB_THETA_ELD_MAX_ERR 100
 
 static void
@@ -230,7 +229,7 @@ acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t C,
         E->nb_pts = max - min + 1;
         E->nb_border = 2;
         E->box[0] = FLINT_MAX(max, -min);
-        return (E->nb_pts <= ACB_THETA_ELD_MAX_PTS);
+        return 1;
     }
 
     /* Begin main function */
@@ -284,7 +283,6 @@ acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t C,
             E->nb_pts += (&E->rchildren[k])->nb_pts;
             E->nb_border += (&E->rchildren[k])->nb_border;
             slong_vec_max(E->box, E->box, (&E->rchildren[k])->box, d - 1);
-            res = ((E->nb_pts) <= ACB_THETA_ELD_MAX_PTS);
         }
     }
 
@@ -304,7 +302,6 @@ acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t C,
             E->nb_pts += (&E->lchildren[k])->nb_pts;
             E->nb_border += (&E->lchildren[k])->nb_border;
             slong_vec_max(E->box, E->box, (&E->lchildren[k])->box, d - 1);
-            res = ((E->nb_pts) <= ACB_THETA_ELD_MAX_PTS);
         }
     }
 
