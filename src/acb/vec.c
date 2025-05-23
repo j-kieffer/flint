@@ -78,6 +78,7 @@ int func_name(T ap, slong len)  \
 IS_OP(_acb_vec_is_zero,   acb_srcptr, acb_is_zero)
 IS_OP(_acb_vec_is_real,   acb_srcptr, acb_is_real)
 IS_OP(_acb_vec_is_finite, acb_srcptr, acb_is_finite)
+IS_OP(_acb_vec_is_exact,   acb_srcptr, acb_is_exact)
 
 #define SET_OP_1(func_name, T, OP) \
 void func_name(T ap, slong len) \
