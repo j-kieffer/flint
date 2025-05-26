@@ -23,6 +23,7 @@ acb_theta_ctx_tau_clear(acb_theta_ctx_tau_t ctx)
 
     arb_mat_clear(&ctx->yinv);
     arb_mat_clear(&ctx->cho);
+    arb_clear(&ctx->rho);
     acb_mat_clear(ctx->exp_tau_div_4);
     acb_mat_clear(ctx->exp_tau_div_2);
     acb_mat_clear(ctx->exp_tau);

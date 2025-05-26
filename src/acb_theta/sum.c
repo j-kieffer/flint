@@ -100,7 +100,7 @@ acb_theta_sum_0x(acb_ptr th, const acb_theta_ctx_z_struct * vec, slong nb,
     sqr_pow = flint_malloc(g * sizeof(acb_ptr));
 
     acb_theta_ctx_z_common_v(v, vec, nb, prec + guard);
-    acb_theta_sum_radius(R2, eps, &ctx_tau->cho, 0,
+    acb_theta_sum_radius(R2, eps, &ctx_tau->cho, &ctx_tau->rho, 0,
         prec + FLINT_MAX(0, acb_theta_sum_addprec(distance)));
     b = acb_theta_eld_set(E, &ctx_tau->cho, R2, v);
 

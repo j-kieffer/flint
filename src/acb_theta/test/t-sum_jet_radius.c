@@ -31,6 +31,7 @@ TEST_FUNCTION_START(acb_theta_sum_jet_radius, state)
         acb_theta_eld_t E;
         acb_mat_t tau;
         arb_mat_t cho, yinv;
+        arb_t rho;
         arf_t R2, eps;
         acb_ptr z;
         arb_ptr y, v;
@@ -45,6 +46,7 @@ TEST_FUNCTION_START(acb_theta_sum_jet_radius, state)
         acb_mat_init(tau, g, g);
         arb_mat_init(cho, g, g);
         arb_mat_init(yinv, g, g);
+        arb_init(rho);
         arf_init(R2);
         arf_init(eps);
         acb_theta_eld_init(E, g, g);
@@ -70,7 +72,8 @@ TEST_FUNCTION_START(acb_theta_sum_jet_radius, state)
         arb_exp(u, u, prec);
         arb_mat_vector_mul_col(v, cho, v, prec);
 
-        acb_theta_sum_jet_radius(R2, eps, cho, v, ord, mprec);
+        acb_theta_eld_shortest(rho, cho, mprec);
+        acb_theta_sum_jet_radius(R2, eps, cho, rho, v, ord, mprec);
         arb_mul_arf(u, u, eps, prec);
 
         /* Test: sum of terms on the border of ellipsoid is less than u */
@@ -117,6 +120,7 @@ TEST_FUNCTION_START(acb_theta_sum_jet_radius, state)
         acb_mat_clear(tau);
         arb_mat_clear(cho);
         arb_mat_clear(yinv);
+        arb_clear(rho);
         arf_clear(R2);
         arf_clear(eps);
         acb_theta_eld_clear(E);

@@ -30,6 +30,7 @@ acb_theta_ctx_tau_dupl(acb_theta_ctx_tau_t ctx, slong prec)
     /* Update cho, yinv */
     arb_mat_scalar_mul_arb(&ctx->cho, &ctx->cho, sqrt2, prec);
     arb_mat_scalar_mul_2exp_si(&ctx->yinv, &ctx->yinv, -1);
+    arb_mul(&ctx->rho, &ctx->rho, sqrt2, prec);
 
     /* Swap matrices around */
     FLINT_SWAP(acb_mat_struct, *ctx->exp_tau_div_4, *ctx->exp_tau_div_2);

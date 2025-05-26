@@ -132,8 +132,9 @@ acb_theta_ctx_tau_set(acb_theta_ctx_tau_t ctx, const acb_mat_t tau, slong prec)
         }
     }
 
-    /* Set cho, yinv */
+    /* Set cho, yinv, rho */
     acb_siegel_cho_yinv(&ctx->cho, &ctx->yinv, tau, prec);
+    acb_theta_eld_shortest(&ctx->rho, &ctx->cho, prec);
 
     /* Set exponentials for shifts */
     if (ctx->allow_shift)

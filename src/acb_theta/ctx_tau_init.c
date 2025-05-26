@@ -25,6 +25,7 @@ acb_theta_ctx_tau_init(acb_theta_ctx_tau_t ctx, int allow_shift, slong g)
     ctx->allow_shift = allow_shift;
     arb_mat_init(&ctx->yinv, g, g);
     arb_mat_init(&ctx->cho, g, g);
+    arb_init(&ctx->rho);
 
     acb_mat_init(ctx->exp_tau_div_4, g, g);
     acb_mat_init(ctx->exp_tau_div_2, g, g);

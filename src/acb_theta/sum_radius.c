@@ -125,19 +125,6 @@ acb_theta_sum_radius_v1(arf_t R2, const arb_mat_t cho, slong ord, slong prec)
 }
 
 static void
-acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec)
-{
-    slong g = arb_mat_nrows(cho);
-    arb_ptr zero;
-
-    zero = _arb_vec_init(g);
-
-    acb_theta_eld_dist(rho, zero, cho, 1, prec);
-
-    _arb_vec_clear(zero, g);
-}
-
-static void
 acb_theta_radius_rhs_v2(arb_t res, const arb_t rho, const arf_t R2, slong ord,
     slong g, slong prec)
 {
@@ -172,21 +159,17 @@ acb_theta_radius_rhs_v2(arb_t res, const arb_t rho, const arf_t R2, slong ord,
 }
 
 static void
-acb_theta_sum_radius_v2(arf_t R2, const arf_t R2max, const arb_mat_t cho,
-    slong ord, slong prec)
+acb_theta_sum_radius_v2(arf_t R2, const arf_t R2max, const arb_t rho,
+    slong ord, slong g, slong prec)
 {
-    slong g = arb_mat_nrows(cho);
     slong lp = ACB_THETA_LOW_PREC;
-    arb_t rho;
     arb_t u;
     arf_t newR2, R2min;
 
-    arb_init(rho);
     arb_init(u);
     arf_init(newR2);
     arf_init(R2min);
 
-    acb_theta_eld_shortest(rho, cho, lp);
     arf_set(R2, R2max);
     arf_set(newR2, R2);
 
@@ -221,7 +204,7 @@ acb_theta_sum_radius_v2(arf_t R2, const arf_t R2max, const arb_mat_t cho,
         acb_theta_radius_rhs_v2(u, rho, newR2, ord, g, lp);
         arb_mul_2exp_si(u, u, prec);
         arb_sub_si(u, u, 1, lp);
-        if (arb_is_positive(u))
+        if (!arb_is_nonpositive(u))
         {
             break;
         }
@@ -231,21 +214,22 @@ acb_theta_sum_radius_v2(arf_t R2, const arf_t R2max, const arb_mat_t cho,
         }
     }
 
-    arb_clear(rho);
     arb_clear(u);
     arf_clear(newR2);
     arf_clear(R2min);
 }
 
 void
-acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, slong ord, slong prec)
+acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho,
+    slong ord, slong prec)
 {
+    slong g = arb_mat_nrows(cho);
     arf_t u;
+
     arf_init(u);
 
     acb_theta_sum_radius_v1(R2, cho, ord, prec);
-    acb_theta_sum_radius_v2(u, R2, cho, ord, prec);
-
+    acb_theta_sum_radius_v2(u, R2, rho, ord, g, prec);
     arf_min(R2, R2, u);
 
     /* Set error 2^(-prec) */

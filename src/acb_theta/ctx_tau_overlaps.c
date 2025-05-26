@@ -26,6 +26,7 @@ acb_theta_ctx_tau_overlaps(const acb_theta_ctx_tau_t ctx1, const acb_theta_ctx_t
 
     res = arb_mat_overlaps(&ctx1->yinv, &ctx2->yinv)
         && arb_mat_overlaps(&ctx1->cho, &ctx2->cho)
+        && arb_overlaps(&ctx1->rho, &ctx2->rho)
         && acb_mat_overlaps(ctx1->exp_tau_div_4, ctx2->exp_tau_div_4)
         && acb_mat_overlaps(ctx1->exp_tau_div_2, ctx2->exp_tau_div_2)
         && acb_mat_overlaps(ctx1->exp_tau, ctx2->exp_tau)

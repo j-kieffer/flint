@@ -319,7 +319,7 @@ acb_theta_sum_jet(acb_ptr th, const acb_theta_ctx_z_struct * vec, slong nb,
         fmpz_init(t);
 
         acb_theta_ctx_z_common_v(v, vec, nb, prec + guard);
-        acb_theta_sum_jet_radius(R2, eps, &ctx_tau->cho, v, ord, prec);
+        acb_theta_sum_jet_radius(R2, eps, &ctx_tau->cho, &ctx_tau->rho, v, ord, prec);
         if (all_a)
         {
             /* Take into account that everything is duplicated in worker */

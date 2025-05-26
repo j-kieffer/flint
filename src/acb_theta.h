@@ -167,14 +167,16 @@ void acb_theta_eld_print(const acb_theta_eld_t E);
 
 void acb_theta_eld_dist(arb_t d, arb_srcptr v, const arb_mat_t cho,
     int omit_zero, slong prec);
+void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec);
 void acb_theta_eld_dist_vec(arb_ptr ds, acb_srcptr zs, slong nb,
     const acb_mat_t tau, slong prec);
 
 /* Error bounds in summation algorithms */
 
-void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, slong ord, slong prec);
-void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho, arb_srcptr v,
-    slong ord, slong prec);
+void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho,
+    const arb_t rho, slong ord, slong prec);
+void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho,
+    const arb_t rho, arb_srcptr v, slong ord, slong prec);
 void acb_theta_sum_term(acb_t res, acb_srcptr z, const acb_mat_t tau, const slong * tup,
     const slong * n, slong prec);
 slong acb_theta_sum_addprec(const arb_t d);
@@ -187,6 +189,7 @@ struct acb_theta_ctx_tau_struct
     int allow_shift;
     arb_mat_struct yinv;
     arb_mat_struct cho;
+    arb_struct rho;
 
     acb_mat_t exp_tau_div_4;
     acb_mat_t exp_tau_div_2;

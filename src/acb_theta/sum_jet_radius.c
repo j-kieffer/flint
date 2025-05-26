@@ -14,10 +14,10 @@
 #include "acb_theta.h"
 
 void
-acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t C, arb_srcptr v,
-    slong ord, slong prec)
+acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho,
+    const arb_t rho, arb_srcptr v, slong ord, slong prec)
 {
-    slong g = arb_mat_nrows(C);
+    slong g = arb_mat_nrows(cho);
     slong lp = ACB_THETA_LOW_PREC;
     arb_mat_t mat;
     arb_ptr vec;
@@ -34,9 +34,9 @@ acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t C, arb_srcptr v,
     arf_init(cmp);
     mag_init(norm);
 
-    /* Get norms of C^{-1} and v */
+    /* Get norms of cho^{-1} and v */
     arb_mat_one(mat);
-    arb_mat_solve_triu(mat, C, mat, 0, lp);
+    arb_mat_solve_triu(mat, cho, mat, 0, lp);
     arb_mat_bound_inf_norm(norm, mat);
     arf_set_mag(arb_midref(na), norm);
 
@@ -45,7 +45,7 @@ acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t C, arb_srcptr v,
     arf_set_mag(arb_midref(nx), norm);
 
     /* Get R2, eps assuming R <= nx/na */
-    acb_theta_sum_radius(R2, eps, C, 0, prec);
+    acb_theta_sum_radius(R2, eps, cho, rho, 0, prec);
     arb_mul_2exp_si(t, nx, 1);
     arb_one(u);
     arb_max(t, t, u, lp);
@@ -59,7 +59,7 @@ acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t C, arb_srcptr v,
     arb_get_lbound_arf(cmp, t, lp);
     if (arf_cmp(cmp, R2) <= 0)
     {
-        acb_theta_sum_radius(R2, eps, C, ord, prec);
+        acb_theta_sum_radius(R2, eps, cho, rho, ord, prec);
         arb_div(t, nx, na, lp);
         arb_get_ubound_arf(cmp, t, lp);
         arf_max(R2, R2, cmp);

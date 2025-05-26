@@ -661,6 +661,21 @@ computed using :func:`acb_theta_eld_init` and :func:`acb_theta_eld_set`.
     Prints a faithful description of `E`. This may be unwieldy in high
     dimensions.
 
+.. function:: void acb_theta_eld_dist(arb_t d, arb_srcptr v, const arb_mat_t cho, int omit_zero, slong prec)
+
+    Sets *d* to the distance (for the usual Euclidean norm) between `Cv` and
+    `C\mathbb{Z}^g`, where `C` is *cho*. We first round the coordinates of `v`
+    to obtain an element of `\mathbb{Z}^g` providing an upper bound on the
+    distance, then enumerate all the points in the ellipsoid of that radius to
+    find all the closer points, if any. If *omit_zero* is set to true, then
+    this function computes the distance between `Cv` and
+    `C\mathbb{Z}^g\backslash\{0\}` instead.
+
+.. function:: void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec)
+
+    Sets *rho* to the Euclidean norm of the shortest nonzero vector in
+    `C\mathbb{Z}^g`, where `C` is *cho*.
+
 .. function:: void acb_theta_eld_dist_vec(arb_ptr ds, acb_srcptr zs, slong nb, const acb_mat_t tau, slong prec)
 
     Sets *ds* to the concatenation of the following *nb* vectors of length
@@ -669,18 +684,13 @@ computed using :func:`acb_theta_eld_init` and :func:`acb_theta_eld_set`.
     `\mathrm{Dist}_\tau` denotes the distance attached to `\lVert \cdot
     \rVert_\tau`.
 
-    We first round the coordinates of `-Y^{-1}y` to obtain an element of
-    `\mathbb{Z}^g + \tfrac{a}{2}` providing an upper bound on the distance,
-    then enumerate all the points in the ellipsoid of that radius to find all
-    the closer points, if any.
-
 Error bounds in summation algorithms
 -------------------------------------------------------------------------------
 
 To compute the correct ellipsoids in summation algorithms for a target working
-precision, we use the following upper bound on the tail of the series: by
-[EK2025]_, for any `v\in \mathbb{R}^g`, any upper-triangular Cholesky matrix
-`C`, any nonnegative *ord*, and any `R\geq 0`, we have
+precision, we use the two following upper bound on the tail of the
+series. First, by [EK2025]_, for any `v\in \mathbb{R}^g`, any upper-triangular
+Cholesky matrix `C`, any nonnegative *ord*, and any `R\geq 0`, we have
 
     .. math::
 
@@ -688,18 +698,31 @@ precision, we use the following upper bound on the tail of the series: by
         \leq (1 + \sqrt{\tfrac{8}{\pi}}) \max\{2,R\}^{g-1} R^{p} e^{-R^2} \prod_{j=0}^{g-1} (1 + \tfrac{\sqrt{2\pi}}{\gamma_j})
 
 where `\gamma_0,\ldots, \gamma_{g-1}` are the diagonal coefficients of
-`C`.
+`C`. Second, by [DHBHS2004]_, if
 
-.. function:: void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, slong ord, slong prec)
+    .. math::
 
-    Sets *eps* to `2^{-\mathit{prec}}` and chooses *R2* such that the above
-    upper bound for *R2* and the given *ord* is at most *eps*, where `C` is
-    *cho*. When *ord = 0*, the square root of *R2* is a suitable ellipsoid
+        R > \frac{1}{2} \left(\rho + \sqrt{g + 2\mathit{ord} + \sqrt{g^2 + 8\mathit{ord}}} \right),
+
+then
+
+    .. math::
+
+        \sum_{n\in C\mathbb{Z}^g + Cv,\ \lVert n\rVert^2 \geq R^2} \lVert n\rVert^{\mathit{ord}} e^{-\lVert n\rVert^2}
+        \leq \frac{g}{2} \left(\frac{2}{\rho}\right)^g \Gamma\left(\frac{g + \mathit{ord}}{2}, (R - \rho/2)^2\right)
+
+where `\rho` denotes the norm of the shortest nonzero vector in `C \mathbb{Z}^g`.
+
+.. function:: void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho, slong ord, slong prec)
+
+    Sets *eps* to `2^{-\mathit{prec}}` and chooses *R2* such that one of the
+    above upper bounds for *R2* and the given *ord* is at most *eps*, where `C`
+    is *cho*. When *ord = 0*, the square root of *R2* is a suitable ellipsoid
     radius for a partial sum of the theta series, and *eps* is an upper bound
     on the absolute value of the tail of the series defining
     `\widetilde{\theta}_{a,b}`.
 
-.. function:: void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho, arb_srcptr v, slong ord, slong prec)
+.. function:: void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho, arb_srcptr v, slong ord, slong prec)
 
     Computes a suitable squared radius *R2* and error bound *eps* on the tail
     of the theta series as in :func:`acb_theta_sum_radius`, but in the context

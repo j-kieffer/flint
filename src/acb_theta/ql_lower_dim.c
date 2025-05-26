@@ -26,12 +26,14 @@ acb_theta_ql_eld_points(slong ** pts, slong * nb_pts, arb_ptr v,
     slong lp = ACB_THETA_LOW_PREC;
     arb_t max_d;
     arf_t R2;
+    arb_t rho;
     acb_theta_eld_t E;
     slong k;
     int res;
 
     acb_theta_eld_init(E, g - s, g - s);
     arf_init(R2);
+    arb_init(rho);
     arb_init(max_d);
 
     /* Get offset */
@@ -46,7 +48,8 @@ acb_theta_ql_eld_points(slong ** pts, slong * nb_pts, arb_ptr v,
         arb_max(max_d, max_d, &d[k], lp);
     }
     *fullprec = prec + acb_theta_sum_addprec(max_d);
-    acb_theta_sum_radius(R2, eps, C, 0, *fullprec);
+    acb_theta_eld_shortest(rho, C, lp);
+    acb_theta_sum_radius(R2, eps, C, rho, 0, *fullprec);
 
     /* List points in ellipsoid */
     res = acb_theta_eld_set(E, C1, R2, v);
@@ -65,6 +68,7 @@ acb_theta_ql_eld_points(slong ** pts, slong * nb_pts, arb_ptr v,
 
     acb_theta_eld_clear(E);
     arf_clear(R2);
+    arb_clear(rho);
     arb_init(max_d);
     return res;
 }
