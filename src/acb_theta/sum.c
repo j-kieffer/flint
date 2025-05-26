@@ -9,7 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include "profiler.h"
 #include "fmpz.h"
 #include "acb.h"
 #include "arb_mat.h"

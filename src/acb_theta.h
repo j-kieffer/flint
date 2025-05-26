@@ -139,7 +139,9 @@ typedef struct acb_theta_eld_struct acb_theta_eld_t[1];
 void acb_theta_eld_init(acb_theta_eld_t E, slong d, slong g);
 void acb_theta_eld_clear(acb_theta_eld_t E);
 
-int acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t C, const arf_t R2, arb_srcptr v);
+int acb_theta_eld_interval(slong * min, slong * mid, slong * max,
+    const arb_t ctr, const arf_t rad);
+int acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t cho, const arf_t R2, arb_srcptr v);
 
 FLINT_FORCE_INLINE slong
 acb_theta_eld_nb_pts(const acb_theta_eld_t E)
@@ -161,15 +163,18 @@ acb_theta_eld_nb_border(const acb_theta_eld_t E)
     return E->nb_border;
 }
 
+int acb_theta_eld_pt_is_zero(const slong * pt, slong g);
 void acb_theta_eld_border(slong * pts, const acb_theta_eld_t E);
 int acb_theta_eld_contains(const acb_theta_eld_t E, const slong * pt);
 void acb_theta_eld_print(const acb_theta_eld_t E);
 
+void acb_theta_eld_dist_pt(arb_t d, arb_srcptr v, const arb_mat_t cho,
+    const slong * n, slong prec);
 void acb_theta_eld_dist(arb_t d, arb_srcptr v, const arb_mat_t cho,
     int omit_zero, slong prec);
-void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec);
 void acb_theta_eld_dist_vec(arb_ptr ds, acb_srcptr zs, slong nb,
     const acb_mat_t tau, slong prec);
+void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec);
 
 /* Error bounds in summation algorithms */
 
