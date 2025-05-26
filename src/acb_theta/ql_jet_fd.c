@@ -373,6 +373,7 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
         && (ord == 0 || ord == 1 || ord == 3))
     {
         compute_dth = 0;
+        res = 1;
     }
 
     /* Compute low-precision derivatives of theta if necessary */

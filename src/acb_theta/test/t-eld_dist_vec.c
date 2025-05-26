@@ -15,7 +15,7 @@
 #include "acb_mat.h"
 #include "acb_theta.h"
 
-TEST_FUNCTION_START(acb_theta_eld_distances, state)
+TEST_FUNCTION_START(acb_theta_eld_dist_vec, state)
 {
     slong iter;
 
@@ -48,7 +48,7 @@ TEST_FUNCTION_START(acb_theta_eld_distances, state)
             acb_add_arb(&z[k], &z[k], c, prec);
         }
 
-        acb_theta_eld_distances(d, z, 1, tau, prec);
+        acb_theta_eld_dist_vec(d, z, 1, tau, prec);
 
         if (!arb_contains_zero(&d[a])
             || !_arb_vec_is_finite(d, n))

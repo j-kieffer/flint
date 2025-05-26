@@ -24,7 +24,7 @@
 #include "t-ctx_z_add_real.c"
 #include "t-ctx_z_dupl.c"
 #include "t-eld_border.c"
-#include "t-eld_distances.c"
+#include "t-eld_dist_vec.c"
 #include "t-eld_points.c"
 #include "t-g2_character.c"
 #include "t-g2_chi3_6.c"
@@ -80,7 +80,7 @@ test_struct tests[] =
     TEST_FUNCTION(acb_theta_ctx_z_add_real),
     TEST_FUNCTION(acb_theta_ctx_z_dupl),
     TEST_FUNCTION(acb_theta_eld_border),
-    TEST_FUNCTION(acb_theta_eld_distances),
+    TEST_FUNCTION(acb_theta_eld_dist_vec),
     TEST_FUNCTION(acb_theta_eld_points),
     TEST_FUNCTION(acb_theta_g2_character),
     TEST_FUNCTION(acb_theta_g2_chi3_6),

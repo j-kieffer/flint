@@ -82,7 +82,7 @@ int main(int argc, char * argv[])
     arb_printd(det, 5);
     flint_printf("\nComputing distances: ");
     TIMEIT_START;
-    acb_theta_eld_distances(distances, z, 1, tau, lp);
+    acb_theta_eld_dist_vec(distances, z, 1, tau, lp);
     TIMEIT_STOP;
 
     flint_printf("Setting contexts: ");

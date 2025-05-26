@@ -64,7 +64,7 @@ int main(int argc, char * argv[])
         acb_mul_si(acb_mat_entry(tau, g - 1, j), acb_mat_entry(tau, g - 1, j), skew, prec);
     }
     acb_siegel_randtest_vec_reduced(zs + g, state, 1, tau, 1, prec);
-    acb_theta_eld_distances(distances, zs, 2, tau, 32);
+    acb_theta_eld_dist_vec(distances, zs, 2, tau, 32);
 
     flint_printf("g = %wd, nb_steps = %wd, tau, z:\n", g, nb_steps);
     acb_mat_printd(tau, 5);

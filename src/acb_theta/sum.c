@@ -288,7 +288,9 @@ acb_theta_sum(acb_ptr th, const acb_theta_ctx_z_struct * vec, slong nb,
             {
                 acb_theta_ctx_z_shift_a0(&new_vec[j], &cs[j], &vec[j], ctx_tau, a, prec + guard);
             }
+
             acb_theta_sum_0x(res, new_vec, nb, ctx_tau, &distances[a], all_b, prec);
+
             for (j = 0; j < nb; j++)
             {
                 _acb_vec_scalar_mul(th + nbab * j + nbb * a, res + nbb * j,

@@ -56,7 +56,7 @@ TEST_FUNCTION_START(acb_theta_sum, state)
 
         acb_siegel_randtest_vec_reduced(z, state, 1, tau, 0, prec);
         acb_theta_ctx_z_set(ctx, z, ctx_tau, prec);
-        acb_theta_eld_distances(d, z, 1, tau, prec);
+        acb_theta_eld_dist_vec(d, z, 1, tau, prec);
 
         /* Call sum at precision mprec, test against modular_theta */
         acb_theta_sum(th, ctx, 1, ctx_tau, d, all_a, all_b, 0, mprec);

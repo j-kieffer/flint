@@ -397,7 +397,6 @@ acb_theta_ql_setup(acb_ptr rts, acb_ptr rts_all, acb_ptr t, slong * guard, slong
         /* Add possible easy steps compared to what we already know */
         acb_theta_ql_setup_easy(rts, rts_all, easy_steps, vec, nb,
             is_zero, ctx_tau_1, distances, nb_steps, all, lowprec);
-
         /* Let easy_steps[0] be the minimal value (necessary for duplication
            steps) */
         for (j = 1; j < nb; j++)
@@ -410,10 +409,11 @@ acb_theta_ql_setup(acb_ptr rts, acb_ptr rts_all, acb_ptr t, slong * guard, slong
            have computed all the roots we want. Pick an auxiliary t for the
            other hard steps; if it doesn't work, then we restart with an
            increased lowprec. */
-        if (!done)
+        /* If lowprec <= 16, try again with easy steps instead. */
+        if (!done && lowprec >= ACB_THETA_LOW_PREC)
         {
-            /* Reset ctx_tau_dupl; note that the input vec in
-               setup_hard is exactly as output by setup_easy */
+            /* Note that the input vec in setup_hard is exactly as output by
+               setup_easy */
             done = acb_theta_ql_setup_hard(rts, rts_all, t, vec, nb,
                 ctx_tau_2, easy_steps, distances, nb_steps, all, lowprec);
         }

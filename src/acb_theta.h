@@ -165,7 +165,9 @@ void acb_theta_eld_border(slong * pts, const acb_theta_eld_t E);
 int acb_theta_eld_contains(const acb_theta_eld_t E, const slong * pt);
 void acb_theta_eld_print(const acb_theta_eld_t E);
 
-void acb_theta_eld_distances(arb_ptr ds, acb_srcptr zs, slong nb,
+void acb_theta_eld_dist(arb_t d, arb_srcptr v, const arb_mat_t cho,
+    int omit_zero, slong prec);
+void acb_theta_eld_dist_vec(arb_ptr ds, acb_srcptr zs, slong nb,
     const acb_mat_t tau, slong prec);
 
 /* Error bounds in summation algorithms */
