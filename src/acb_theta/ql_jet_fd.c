@@ -350,14 +350,12 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
     slong nbjet = acb_theta_jet_nb(ord, g);
     slong nbjet_2 = acb_theta_jet_nb(ord + 2, g);
     acb_ptr new_zs;
-    acb_theta_ctx_tau_t ctx_tau;
-    acb_theta_ctx_z_struct * vec;
     acb_ptr dth;
     arb_ptr err;
     acb_mat_t tau_mid;
-    arf_t e;
     slong j, k, lp;
     int res = 0;
+    int compute_dth = 1;
 
     if (nb <= 0)
     {
@@ -365,49 +363,57 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
     }
 
     new_zs = _acb_vec_init(nb * g);
-    acb_theta_ctx_tau_init(ctx_tau, 0, g);
-    vec = acb_theta_ctx_z_vec_init(nb, g);
     dth = _acb_vec_init(nb * nbjet_2 * nbth);
     err = _arb_vec_init(nb * nbjet * nbth);
     acb_mat_init(tau_mid, g, g);
-    arf_init(e);
 
-    /* Compute low-precision derivatives of theta */
+    /* dth can be artificially set to zero if the computation is exact
+     * throughout, i.e., both tau and z are exact + ord is 0, 1 or 3 */
+    if (acb_mat_is_exact(tau) && _acb_vec_is_exact(zs, nb * g)
+        && (ord == 0 || ord == 1 || ord == 3))
+    {
+        compute_dth = 0;
+    }
+
+    /* Compute low-precision derivatives of theta if necessary */
     /* Add an error of 2^(-prec/(ord + 1)) around z, so that the auxiliary
        evaluation points used in finite differences are contained in new_zs */
-    arf_one(e);
-    arf_mul_2exp_si(e, e, -floor(prec / (ord + 1)));
-    _acb_vec_set(new_zs, zs, nb * g);
-    for (j = 0; j < nb * g; j++)
+    if (compute_dth)
     {
-        acb_add_error_arf(&new_zs[j], e);
-    }
-    for (lp = 8; lp <= 64; lp *= 2)
-    {
-        acb_theta_ctx_tau_set(ctx_tau, tau, lp + ACB_THETA_LOW_PREC);
-        for (j = 0; j < nb; j++)
-        {
-            acb_theta_ctx_z_set(&vec[j], zs + j * g, ctx_tau, lp + ACB_THETA_LOW_PREC);
-        }
-        acb_theta_sum_jet(dth, vec, nb, ctx_tau, ord + 2, 1, all, lp);
-        if (_acb_vec_is_finite(dth, nb * nbth * nbjet_2))
-        {
-            res = 1;
-            break;
-        }
-    }
+        acb_theta_ctx_tau_t ctx_tau;
+        acb_theta_ctx_z_struct * vec;
+        arf_t e;
 
-    /* Get error bounds */
-    lp = ACB_THETA_LOW_PREC;
-    for (j = 0; j < nb; j++)
-    {
-        for (k = 0; k < nbth; k++)
+        acb_theta_ctx_tau_init(ctx_tau, 0, g);
+        vec = acb_theta_ctx_z_vec_init(nb, g);
+        arf_init(e);
+
+        arf_one(e);
+        arf_mul_2exp_si(e, e, -floor(prec / (ord + 1)));
+        _acb_vec_set(new_zs, zs, nb * g);
+        for (j = 0; j < nb * g; j++)
         {
-            acb_theta_ql_jet_error(err + j * nbth * nbjet + k * nbjet, zs + j * g,
-                tau, dth + j * nbth * nbjet_2 + k * nbjet_2, ord, lp);
+            acb_add_error_arf(&new_zs[j], e);
         }
+        for (lp = 8; lp <= 64; lp *= 2)
+        {
+            acb_theta_ctx_tau_set(ctx_tau, tau, lp + ACB_THETA_LOW_PREC);
+            for (j = 0; j < nb; j++)
+            {
+                acb_theta_ctx_z_set(&vec[j], zs + j * g, ctx_tau, lp + ACB_THETA_LOW_PREC);
+            }
+            acb_theta_sum_jet(dth, vec, nb, ctx_tau, ord + 2, 1, all, lp);
+            if (_acb_vec_is_finite(dth, nb * nbth * nbjet_2))
+            {
+                res = 1;
+                break;
+            }
+        }
+
+        acb_theta_ctx_tau_clear(ctx_tau);
+        acb_theta_ctx_z_vec_clear(vec, nb);
+        arf_clear(e);
     }
-    /* Todo: adjust current working precision so that 2^(-prec) is roughly err ? */
 
     if (res && ord == 0)
     {
@@ -430,6 +436,18 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
             acb_get_mid(&new_zs[j], &zs[j]);
         }
 
+        /* Get error bounds */
+        lp = ACB_THETA_LOW_PREC;
+        for (j = 0; j < nb; j++)
+        {
+            for (k = 0; k < nbth; k++)
+            {
+                acb_theta_ql_jet_error(err + j * nbth * nbjet + k * nbjet, zs + j * g,
+                    tau, dth + j * nbth * nbjet_2 + k * nbjet_2, ord, lp);
+            }
+        }
+        /* Todo: adjust current working precision so that 2^(-prec) is roughly err ? */
+
         /* Call ql_jet_exact and add error */
         acb_theta_ql_jet_exact(th, new_zs, nb, tau_mid, dth, ord, all, prec);
         for (j = 0; j < nb * nbth * nbjet; j++)
@@ -444,10 +462,7 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
     }
 
     _acb_vec_clear(new_zs, nb * g);
-    acb_theta_ctx_tau_clear(ctx_tau);
-    acb_theta_ctx_z_vec_clear(vec, nb);
     _acb_vec_clear(dth, nb * nbjet_2 * nbth);
     _arb_vec_clear(err, nb * nbjet * nbth);
     acb_mat_clear(tau_mid);
-    arf_clear(e);
 }
