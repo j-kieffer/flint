@@ -574,9 +574,10 @@ to analyze the absolute value of each term in the sum defining
 
         \bigl| \exp(i\pi n^T \tau n + 2n^T (z + \tfrac{b}{2}) \bigr| = \exp(\pi y^T Y^{-1} y) \exp (-\lVert n + Y^{-1}y \rVert_\tau^2)
 
-(notation as in the introduction). Thus, the exponential terms whose absolute
-values are less than a given threshold correspond to lattice points `n\in
-\mathbb{Z}^g` lying outside a certain ball centered in `v = -Y^{-1}y` for
+where `\lVert\cdot\rVert_\tau` denotes the Euclidean norm with Gram matrix `\pi
+Y` (notation as in the introduction). Thus, the exponential terms whose
+absolute values are less than a given threshold correspond to lattice points
+`n\in \mathbb{Z}^g` lying outside a certain ball centered in `v = -Y^{-1}y` for
 `\lVert\cdot\rVert_\tau`; in other words, we should be computing partial sums
 over points `n\in \mathbb{Z}^g` lying in certain ellipsoids, as in
 [DHBHS2004]_. This section gathers methods to manipulate such ellipsoids
@@ -613,16 +614,38 @@ children depending on the position of `n_{d-1}` relative to the midpoint. When
 
     Clears *E* as well as any recursive data contained in it.
 
-.. function:: int acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t C, const arf_t R2, arb_srcptr v)
+.. function:: int acb_theta_eld_interval(slong * min, slong * mid, slong * max, const arb_t c, const arf_t R2, const arb_t v, slong prec)
 
-    Assuming that *C* is upper-triangular with positive diagonal entries,
+    Computes integers *min* and *max* such that any integer *n* satisfying the
+    inequality `(cn + v)^2 \leq R^2` also lies between *min* and *max*. The
+    integer *mid* is set to an approximate center of this interval. We require
+    *c* to be positive. The return value is 1, unless the bounds are too large
+    to fit in :type:`slong`'s, in which case the output is undefined and 0 is
+    returned.
+
+.. function:: void acb_theta_eld_recursion(arb_t next_R2, arb_ptr next_v, const arb_mat_t cho, const arb_t R2, arb_srcptr v, slong n, slong g, slong prec)
+
+    Assuming that *cho* is upper-triangular with positive diagonal entries,
+    computes *next_R2* and *next_v* such that the following holds: a point
+    `m\in \Z^g` whose last coordinate is `m_{g - 1} = n` satisfies the
+    inequality `\lVert \mathit{cho} m + v \rVert^2 \leq R^2` (for the standard
+    Euclidean norm) if and only if the point `(m_0,\ldots,m_{g-2})\in \Z^{g -
+    1}` lies in the ellipsoid of squared radius *next_R2* with offset *next_v*
+    for the upper left `(g-1)\times (g-1)` submatrix of *cho*. The matrix *cho*
+    is allowed to have a larger size than *g*, so the same matrix can then be
+    used in recursive calls.
+
+.. function:: int acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t cho, const arf_t R2, arb_srcptr v, slong prec)
+
+    Assuming that *cho* is upper-triangular with positive diagonal entries,
     attempts to set *E* to represent an ellipsoid as defined above, where *R2*
     indicates `R^2`, and returns 1 upon success. If the ellipsoid points do not
     fit in :type:`slong`'s or if the ellipsoid is unreasonably large, returns 0
     instead and leaves *E* undefined.
 
-The following functions are available after *E* has been initialized and then
-computed using :func:`acb_theta_eld_init` and :func:`acb_theta_eld_set`.
+The following functions (up to :func:`acb_theta_eld_print`) are available after
+*E* has been initialized and then computed using :func:`acb_theta_eld_init` and
+:func:`acb_theta_eld_set`.
 
 .. function:: slong acb_theta_eld_nb_pts(acb_theta_eld_t E)
 
@@ -663,18 +686,19 @@ computed using :func:`acb_theta_eld_init` and :func:`acb_theta_eld_set`.
 
 .. function:: void acb_theta_eld_dist(arb_t d, arb_srcptr v, const arb_mat_t cho, int omit_zero, slong prec)
 
-    Sets *d* to the distance (for the usual Euclidean norm) between `Cv` and
-    `C\mathbb{Z}^g`, where `C` is *cho*. We first round the coordinates of `v`
-    to obtain an element of `\mathbb{Z}^g` providing an upper bound on the
-    distance, then enumerate all the points in the ellipsoid of that radius to
-    find all the closer points, if any. If *omit_zero* is set to true, then
-    this function computes the distance between `Cv` and
-    `C\mathbb{Z}^g\backslash\{0\}` instead.
+    Sets *d* to the squared distance (for the usual Euclidean norm) between `v`
+    and `\mathit{cho}\mathbb{Z}^g`. We first round the coordinates of
+    `\mathit{cho}^{-1}v` to obtain an element of `\mathbb{Z}^g` providing an
+    upper bound on the distance, then start looking for closer points inside
+    the corresponding ellipsoid, shrinking the distance as more points are
+    found. If *omit_zero* is set to true, then this function computes the
+    distance between `v` and the closest nonzero vector in
+    `\mathit{cho}\mathbb{Z}^g` instead.
 
 .. function:: void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec)
 
     Sets *rho* to the Euclidean norm of the shortest nonzero vector in
-    `C\mathbb{Z}^g`, where `C` is *cho*.
+    `\mathit{cho}\mathbb{Z}^g`.
 
 .. function:: void acb_theta_eld_dist_vec(arb_ptr ds, acb_srcptr zs, slong nb, const acb_mat_t tau, slong prec)
 
@@ -1908,6 +1932,24 @@ to the chosen Cholesky matrix must be at least the radius of *E*.
 Generates a random ellipsoid *E*, computes its border using
 :func:`acb_theta_eld_border`, and checks that none of these border points lie
 in *E*.
+
+.. code-block:: bash
+
+    ./build/acb_theta/test/main acb_theta_eld_interval
+
+Checks that, if :func:`acb_theta_eld_interval` returns 1, then the points
+`\mathit{min} - 1` and `\mathit{max} + 1` are not (certainly) included in the
+required interval.
+
+
+.. code-block:: bash
+
+    ./build/acb_theta/test/main acb_theta_eld_dist
+
+Calls :func:`acb_theta_eld_dist` on random input, then constructs the ellipsoid
+whose radius is given by an upper bound of the computed distance. We check
+that it contains at least one point, that none of its points are too close to
+the center, and that at least one point is close enough to the center.
 
 .. code-block:: bash
 

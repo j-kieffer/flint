@@ -140,7 +140,7 @@ void acb_theta_eld_init(acb_theta_eld_t E, slong d, slong g);
 void acb_theta_eld_clear(acb_theta_eld_t E);
 
 int acb_theta_eld_interval(slong * min, slong * mid, slong * max,
-    const arb_t gamma, const arf_t R2, const arb_t v, slong prec);
+    const arb_t c, const arf_t R2, const arb_t v, slong prec);
 void acb_theta_eld_recursion(arb_t next_R2, arb_ptr next_v, const arb_mat_t cho,
     const arb_t R2, arb_srcptr v, slong n, slong g, slong prec);
 int acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t cho, const arf_t R2,

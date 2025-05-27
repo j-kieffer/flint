@@ -34,7 +34,7 @@ acb_theta_arf_get_si_safe(slong * m, const arf_t x, arf_rnd_t rnd)
 
 int
 acb_theta_eld_interval(slong * min, slong * mid, slong * max,
-    const arb_t gamma, const arf_t R2, const arb_t v, slong prec)
+    const arb_t c, const arf_t R2, const arb_t v, slong prec)
 {
     slong e;
     arb_t ctr, y;
@@ -48,7 +48,7 @@ acb_theta_eld_interval(slong * min, slong * mid, slong * max,
 
     /* Compute center and mid */
     arb_neg(ctr, v);
-    arb_div(ctr, ctr, gamma, prec);
+    arb_div(ctr, ctr, c, prec);
 
     arf_set_mag(b, arb_radref(ctr));
     res = acb_theta_arf_get_si_safe(&e, b, ARF_RND_NEAR);
@@ -68,7 +68,7 @@ acb_theta_eld_interval(slong * min, slong * mid, slong * max,
     {
         arb_set_arf(y, R2);
         arb_sqrt(y, y, prec);
-        arb_div(y, y, gamma, prec);
+        arb_div(y, y, c, prec);
         arb_get_ubound_arf(rad, y, prec);
 
         arb_set_arf(y, rad);
