@@ -351,8 +351,6 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
     slong nbjet_2 = acb_theta_jet_nb(ord + 2, g);
     acb_ptr new_zs;
     acb_ptr dth;
-    arb_ptr err;
-    acb_mat_t tau_mid;
     slong j, k, lp;
     int res = 0;
     int compute_dth = 1;
@@ -364,8 +362,6 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
 
     new_zs = _acb_vec_init(nb * g);
     dth = _acb_vec_init(nb * nbjet_2 * nbth);
-    err = _arb_vec_init(nb * nbjet * nbth);
-    acb_mat_init(tau_mid, g, g);
 
     /* dth can be artificially set to zero if the computation is exact
      * throughout, i.e., both tau and z are exact + ord is 0, 1 or 3 */
@@ -423,6 +419,12 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
     }
     else if (res)
     {
+        arb_ptr err;
+        acb_mat_t tau_mid;
+
+        err = _arb_vec_init(nb * nbjet * nbth);
+        acb_mat_init(tau_mid, g, g);
+
         /* We want to call ql_jet_exact. Strip tau, z of error bounds */
         for (j = 0; j < g; j++)
         {
@@ -455,6 +457,9 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
         {
             acb_add_error_arb(&th[j], &err[j]);
         }
+
+        _arb_vec_clear(err, nb * nbjet * nbth);
+        acb_mat_clear(tau_mid);
     }
     else
     {
@@ -464,6 +469,4 @@ acb_theta_ql_jet_fd(acb_ptr th, acb_srcptr zs, slong nb,
 
     _acb_vec_clear(new_zs, nb * g);
     _acb_vec_clear(dth, nb * nbjet_2 * nbth);
-    _arb_vec_clear(err, nb * nbjet * nbth);
-    acb_mat_clear(tau_mid);
 }
