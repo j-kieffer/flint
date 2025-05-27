@@ -26,6 +26,7 @@
 #include "t-eld_border.c"
 #include "t-eld_dist.c"
 #include "t-eld_dist_vec.c"
+#include "t-eld_interval.c"
 #include "t-eld_points.c"
 #include "t-g2_character.c"
 #include "t-g2_chi3_6.c"
@@ -83,6 +84,7 @@ test_struct tests[] =
     TEST_FUNCTION(acb_theta_eld_border),
     TEST_FUNCTION(acb_theta_eld_dist),
     TEST_FUNCTION(acb_theta_eld_dist_vec),
+    TEST_FUNCTION(acb_theta_eld_interval),
     TEST_FUNCTION(acb_theta_eld_points),
     TEST_FUNCTION(acb_theta_g2_character),
     TEST_FUNCTION(acb_theta_g2_chi3_6),

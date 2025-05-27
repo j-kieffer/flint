@@ -46,21 +46,9 @@ acb_theta_eld_interval(slong * min, slong * mid, slong * max,
     arf_init(rad);
     arf_init(b);
 
-    /* Compute center and radius for integer interval */
+    /* Compute center and mid */
     arb_neg(ctr, v);
     arb_div(ctr, ctr, gamma, prec);
-
-    if (arf_cmp_si(R2, 0) < 0)
-    {
-        arf_zero(rad);
-    }
-    else
-    {
-        arb_set_arf(y, R2);
-        arb_sqrt(y, y, prec);
-        arb_div(y, y, gamma, prec);
-        arb_get_ubound_arf(rad, y, prec);
-    }
 
     arf_set_mag(b, arb_radref(ctr));
     res = acb_theta_arf_get_si_safe(&e, b, ARF_RND_NEAR);
@@ -71,15 +59,28 @@ acb_theta_eld_interval(slong * min, slong * mid, slong * max,
 
     res = res && acb_theta_arf_get_si_safe(mid, arb_midref(ctr), ARF_RND_NEAR);
 
-    arb_set_arf(y, rad);
-    arb_add(y, ctr, y, prec);
-    arb_get_ubound_arf(b, y, prec);
-    res = res && acb_theta_arf_get_si_safe(max, b, ARF_RND_FLOOR);
+    if (arf_cmp_si(R2, 0) < 0)
+    {
+        *min = *mid + 1;
+        *max = *mid;
+    }
+    else
+    {
+        arb_set_arf(y, R2);
+        arb_sqrt(y, y, prec);
+        arb_div(y, y, gamma, prec);
+        arb_get_ubound_arf(rad, y, prec);
 
-    arb_set_arf(y, rad);
-    arb_sub(y, ctr, y, prec);
-    arb_get_lbound_arf(b, y, prec);
-    res = res && acb_theta_arf_get_si_safe(min, b, ARF_RND_CEIL);
+        arb_set_arf(y, rad);
+        arb_add(y, ctr, y, prec);
+        arb_get_ubound_arf(b, y, prec);
+        res = res && acb_theta_arf_get_si_safe(max, b, ARF_RND_FLOOR);
+
+        arb_set_arf(y, rad);
+        arb_sub(y, ctr, y, prec);
+        arb_get_lbound_arf(b, y, prec);
+        res = res && acb_theta_arf_get_si_safe(min, b, ARF_RND_CEIL);
+    }
 
     arb_clear(ctr);
     arb_clear(y);
