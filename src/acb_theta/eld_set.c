@@ -14,7 +14,7 @@
 #include "acb_theta.h"
 
 static void
-slong_vec_max(slong * r, slong * v1, slong * v2, slong d)
+acb_theta_slong_vec_max(slong * r, const slong * v1, const slong * v2, slong d)
 {
     slong k;
     for (k = 0; k < d; k++)
@@ -23,35 +23,93 @@ slong_vec_max(slong * r, slong * v1, slong * v2, slong d)
     }
 }
 
-static void
-acb_theta_eld_next_R2(arf_t next_R2, const arf_t R2, const arb_t gamma, const arb_t v, slong k)
+/* Main recursive function in dimension d > 1 */
+static int
+acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t cho,
+    const arf_t R2, arb_srcptr v, slong * coords, slong prec);
+
+/* Helper function for eld_set_rec */
+static int
+acb_theta_eld_set_child(acb_theta_eld_t E, acb_theta_eld_t child,
+    const arb_mat_t cho, const arf_t R2, arb_srcptr v,
+    slong n, slong * coords, slong d, slong prec)
 {
-    slong lp = ACB_THETA_LOW_PREC;
+    arb_ptr next_v;
     arb_t x;
-    arf_t sub;
+    arf_t next_R2;
+    int res;
 
+    next_v = _arb_vec_init(d - 1);
     arb_init(x);
-    arf_init(sub);
+    arf_init(next_R2);
 
-    /* Set next_R2 to R2 - (v + gamma*k)^2 */
-    arb_mul_si(x, gamma, k, lp);
-    arb_add(x, x, v, lp);
-    arb_sqr(x, x, lp);
+    arb_set_arf(x, R2);
+    acb_theta_eld_recursion(x, next_v, cho, x, v, n, d, prec);
+    arb_get_ubound_arf(next_R2, x, prec);
 
-    arb_get_lbound_arf(sub, x, lp);
-    arf_sub(next_R2, R2, sub, lp, ARF_RND_CEIL);
+    coords[d - 1] = n;
+    res = acb_theta_eld_set_rec(child, cho, next_R2, next_v, coords, prec);
+    if (res)
+    {
+        E->nb_pts += child->nb_pts;
+        E->nb_border += child->nb_border;
+        acb_theta_slong_vec_max(E->box, E->box, child->box, d - 1);
+    }
 
+    _arb_vec_clear(next_v, d - 1);
     arb_clear(x);
-    arf_clear(sub);
+    arf_clear(next_R2);
+    return res;
 }
 
-static void
-acb_theta_eld_init_children(acb_theta_eld_t E, slong nr, slong nl)
+static int
+acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t cho,
+    const arf_t R2, arb_srcptr v, slong * coords, slong prec)
 {
     slong d = E->dim;
     slong g = E->ambient_dim;
+    slong min, mid, max, nr, nl;
     slong k;
+    int res;
 
+    res = acb_theta_eld_interval(&min, &mid, &max,
+        arb_mat_entry(cho, d - 1, d - 1), R2, &v[d - 1], prec);
+    if (!res)
+    {
+        return 0;
+    }
+
+    for (k = 0; k < g - d; k++)
+    {
+        E->last_coords[k] = coords[d + k];
+    }
+    E->min = min;
+    E->mid = mid;
+    E->max = max;
+    E->nb_pts = 0;
+    E->nb_border = (d == 1 ? 2 : 0);
+    E->box[d - 1] = FLINT_MAX(max, -min);
+    for (k = 0; k < d - 1; k++)
+    {
+        E->box[k] = 0;
+    }
+
+    /* Induction only if d > 1 and min <= max */
+    if (min > max)
+    {
+        E->box[d - 1] = 0;
+        return 1;
+    }
+    else if (d == 1)
+    {
+        E->nb_pts = max - min + 1;
+        return 1;
+    }
+
+    nr = max - mid + 1;
+    nl = mid - min;
+
+    /* Initialize children */
     if (nr > 0) /* should always be the case */
     {
         E->rchildren = flint_malloc(nr * sizeof(struct acb_theta_eld_struct));
@@ -70,200 +128,37 @@ acb_theta_eld_init_children(acb_theta_eld_t E, slong nr, slong nl)
             acb_theta_eld_init(&E->lchildren[k], d - 1, g);
         }
     }
-}
 
-static int
-acb_theta_eld_init_interval(acb_theta_eld_t E, const arb_mat_t C,
-    const arf_t R2, arb_srcptr v, slong * last_coords)
-{
-    slong min, mid, max;
-    slong d = E->dim;
-    slong g = E->ambient_dim;
-    slong lp = ACB_THETA_LOW_PREC;
-    slong k;
-    arb_t x, ctr;
-    arf_t rad;
-    int res;
-
-    arb_init(x);
-    arb_init(ctr);
-    arf_init(rad);
-
-    for (k = 0; k < g - d; k++)
-    {
-        E->last_coords[k] = last_coords[k];
-    }
-
-    if (arf_cmp_si(R2, 0) < 0)
-    {
-        arf_zero(rad);
-    }
-    else
-    {
-        arb_set_arf(x, R2);
-        arb_sqrt(x, x, lp);
-        arb_div(x, x, arb_mat_entry(C, d - 1, d - 1), lp);
-        arb_get_ubound_arf(rad, x, lp);
-    }
-
-    arb_div(ctr, &v[d - 1], arb_mat_entry(C, d - 1, d - 1), lp);
-    arb_neg(ctr, ctr);
-    res = acb_theta_eld_interval(&min, &mid, &max, ctr, rad);
-
-    if (res)
-    {
-        E->min = min;
-        E->mid = mid;
-        E->max = max;
-    }
-
-    arb_clear(x);
-    arb_clear(ctr);
-    arf_clear(rad);
-    return res;
-}
-
-/* Main recursive function in dimension d>1 */
-
-static int
-acb_theta_eld_set_rec(acb_theta_eld_t E, const arb_mat_t C,
-    const arf_t R2, arb_srcptr v, slong * last_coords)
-{
-    slong d = E->dim;
-    slong g = E->ambient_dim;
-    slong min, mid, max;
-    slong lp = ACB_THETA_LOW_PREC;
-    arf_t next_R2;
-    slong *next_coords;
-    arb_ptr v_diff;
-    arb_ptr v_mid;
-    arb_ptr next_v;
-    slong c, nr, nl, k;
-    int res;
-
-    res = acb_theta_eld_init_interval(E, C, R2, v, last_coords);
-    if (!res)
-    {
-        return 0;
-    }
-    min = E->min;
-    mid = E->mid;
-    max = E->max;
-
-    /* Induction only if d > 1 and min <= max */
-    if (min > max)
-    {
-        E->nb_pts = 0;
-        if (d == 1)
-        {
-            E->nb_border = 2;
-        }
-        else
-        {
-            E->nb_border = 0;
-        }
-        for (k = 0; k < d; k++)
-        {
-            E->box[k] = 0;
-        }
-        return 1;
-    }
-    else if (d == 1)
-    {
-        E->nb_pts = max - min + 1;
-        E->nb_border = 2;
-        E->box[0] = FLINT_MAX(max, -min);
-        return 1;
-    }
-
-    /* Begin main function */
-    arf_init(next_R2);
-    next_coords = flint_malloc((g - d + 1) * sizeof(slong));
-    v_diff = _arb_vec_init(d - 1);
-    v_mid = _arb_vec_init(d - 1);
-    next_v = _arb_vec_init(d - 1);
-
-    /* Initialize children */
-    nr = max - mid + 1;
-    nl = mid - min;
-    acb_theta_eld_init_children(E, nr, nl);
-
-    /* Set v_mid, v_diff */
-    for (k = 0; k < d - 1; k++)
-    {
-        arb_set(&v_diff[k], arb_mat_entry(C, k, d - 1));
-        arb_mul_si(&v_mid[k], &v_diff[k], mid, lp);
-    }
-    _arb_vec_add(v_mid, v_mid, v, d - 1, lp);
-    for (k = 0; k < g - d; k++)
-    {
-        next_coords[k + 1] = last_coords[k];
-    }
-
-    /* Set children recursively */
-    E->nb_pts = 0;
-    E->nb_border = 0;
-    E->box[d - 1] = FLINT_MAX(max, -min);
-    for (k = 0; k < d - 1; k++)
-    {
-        E->box[k] = 0;
-    }
-
-    /* Right loop */
-    _arb_vec_set(next_v, v_mid, d - 1);
+    /* Loop over children */
     for (k = 0; (k < nr) && res; k++)
     {
-        if (k > 0)
-        {
-            _arb_vec_add(next_v, next_v, v_diff, d - 1, lp);
-        }
-
-        c = mid + k;
-        acb_theta_eld_next_R2(next_R2, R2, arb_mat_entry(C, d - 1, d - 1), &v[d - 1], c);
-        next_coords[0] = c;
-        res = acb_theta_eld_set_rec(&E->rchildren[k], C, next_R2, next_v, next_coords);
-        if (res)
-        {
-            E->nb_pts += (&E->rchildren[k])->nb_pts;
-            E->nb_border += (&E->rchildren[k])->nb_border;
-            slong_vec_max(E->box, E->box, (&E->rchildren[k])->box, d - 1);
-        }
+        res = acb_theta_eld_set_child(E, &E->rchildren[k], cho, R2, v,
+            mid + k, coords, d, prec);
     }
-
-    /* Left loop */
-    _arb_vec_set(next_v, v_mid, d - 1);
     for (k = 0; (k < nl) && res; k++)
     {
-        _arb_vec_sub(next_v, next_v, v_diff, d - 1, lp);
-
-        c = mid - (k + 1);
-        acb_theta_eld_next_R2(next_R2, R2, arb_mat_entry(C, d - 1, d - 1), &v[d - 1], c);
-        next_coords[0] = c;
-        res = acb_theta_eld_set_rec(&E->lchildren[k], C, next_R2, next_v, next_coords);
-
-        if (res)
-        {
-            E->nb_pts += (&E->lchildren[k])->nb_pts;
-            E->nb_border += (&E->lchildren[k])->nb_border;
-            slong_vec_max(E->box, E->box, (&E->lchildren[k])->box, d - 1);
-        }
+        res = acb_theta_eld_set_child(E, &E->lchildren[k], cho, R2, v,
+            mid - (k + 1), coords, d, prec);
     }
 
-    arf_clear(next_R2);
-    flint_free(next_coords);
-    _arb_vec_clear(v_diff, d - 1);
-    _arb_vec_clear(v_mid, d - 1);
-    _arb_vec_clear(next_v, d - 1);
     return res;
 }
 
 int
-acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t C, const arf_t R2, arb_srcptr v)
+acb_theta_eld_set(acb_theta_eld_t E, const arb_mat_t cho, const arf_t R2,
+    arb_srcptr v, slong prec)
 {
     slong d = E->dim;
     slong g = E->ambient_dim;
+    slong * coords;
+    int res;
 
+    coords = flint_malloc(g * sizeof(slong));
     acb_theta_eld_clear(E);
     acb_theta_eld_init(E, d, g);
-    return acb_theta_eld_set_rec(E, C, R2, v, NULL);
+
+    res = acb_theta_eld_set_rec(E, cho, R2, v, coords, prec);
+
+    flint_free(coords);
+    return res;
 }

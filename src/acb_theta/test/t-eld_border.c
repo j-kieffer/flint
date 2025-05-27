@@ -49,7 +49,7 @@ TEST_FUNCTION_START(acb_theta_eld_border, state)
             arb_randtest_precise(&v[k], state, prec, mag_bits);
         }
 
-        r = acb_theta_eld_set(E, C, R2, v);
+        r = acb_theta_eld_set(E, C, R2, v, prec);
         if (!r)
         {
             flint_printf("FAIL (ellipsoid)\n");

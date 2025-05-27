@@ -41,6 +41,7 @@ TEST_FUNCTION_START(acb_theta_eld_dist, state)
         arb_mat_init(yinv, g, g);
         z = _acb_vec_init(g);
         v = _arb_vec_init(g);
+        arb_init(d);
         acb_theta_eld_init(E, g, g);
         arf_init(R2);
 
@@ -52,7 +53,7 @@ TEST_FUNCTION_START(acb_theta_eld_dist, state)
         acb_theta_eld_dist(d, v, cho, omit_zero, prec);
 
         arb_get_ubound_arf(R2, d, prec);
-        b = acb_theta_eld_set(E, cho, R2, v);
+        b = acb_theta_eld_set(E, cho, R2, v, prec);
 
         if (b && acb_theta_eld_nb_pts(E) == 0)
         {
@@ -121,6 +122,7 @@ TEST_FUNCTION_START(acb_theta_eld_dist, state)
         arb_mat_clear(yinv);
         _acb_vec_clear(z, g);
         _arb_vec_clear(v, g);
+        arb_clear(d);
         acb_theta_eld_clear(E);
         arf_clear(R2);
     }

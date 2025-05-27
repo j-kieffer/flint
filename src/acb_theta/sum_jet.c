@@ -326,7 +326,7 @@ acb_theta_sum_jet(acb_ptr th, const acb_theta_ctx_z_struct * vec, slong nb,
             _arb_vec_scalar_mul_2exp_si(v, v, g, 1);
             arf_mul_2exp_si(R2, R2, 2);
         }
-        b = acb_theta_eld_set(E, &ctx_tau->cho, R2, v);
+        b = acb_theta_eld_set(E, &ctx_tau->cho, R2, v, ACB_THETA_LOW_PREC);
 
         if (b)
         {

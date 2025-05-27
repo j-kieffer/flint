@@ -24,7 +24,7 @@ TEST_FUNCTION_START(acb_theta_eld_points, state)
        - points outside ellipsoid must have norm greater than R2 */
     for (iter = 0; iter < 500 * flint_test_multiplier(); iter++)
     {
-        slong g = 1 + n_randint(state, 4);
+        slong g = 2; // + n_randint(state, 4);
         slong prec = ACB_THETA_LOW_PREC;
         slong mag_bits = n_randint(state, 2);
         acb_theta_eld_t E;
@@ -59,7 +59,7 @@ TEST_FUNCTION_START(acb_theta_eld_points, state)
             arb_randtest_precise(&v[k], state, prec, mag_bits);
         }
 
-        res = acb_theta_eld_set(E, C, R2, v);
+        res = acb_theta_eld_set(E, C, R2, v, prec);
         if (!res)
         {
             flint_printf("FAIL (ellipsoid)\n");

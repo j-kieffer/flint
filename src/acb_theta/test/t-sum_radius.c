@@ -73,7 +73,7 @@ TEST_FUNCTION_START(acb_theta_sum_radius, state)
         arb_mul_arf(u, u, eps, prec);
 
         /* Test: sum of terms on the border of ellipsoid is less than u */
-        res = acb_theta_eld_set(E, cho, R2, v);
+        res = acb_theta_eld_set(E, cho, R2, v, mprec);
         if (!res)
         {
             flint_printf("FAIL (ellipsoid)\n");
