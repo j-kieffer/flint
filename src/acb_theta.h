@@ -182,7 +182,7 @@ void acb_theta_eld_shortest(arb_t rho, const arb_mat_t cho, slong prec);
 /* Error bounds in summation algorithms */
 
 void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho,
-    const arb_t rho, slong ord, slong prec);
+    const arb_t rho, slong ord, slong prec, int use_dhbhs);
 void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho,
     const arb_t rho, arb_srcptr v, slong ord, slong prec);
 void acb_theta_sum_term(acb_t res, acb_srcptr z, const acb_mat_t tau, const slong * tup,

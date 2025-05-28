@@ -221,7 +221,7 @@ acb_theta_sum_radius_v2(arf_t R2, const arf_t R2max, const arb_t rho,
 
 void
 acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho,
-    slong ord, slong prec)
+    slong ord, slong prec, int use_dhbhs)
 {
     slong g = arb_mat_nrows(cho);
     arf_t u;
@@ -229,8 +229,11 @@ acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho,
     arf_init(u);
 
     acb_theta_sum_radius_v1(R2, cho, ord, prec);
-    acb_theta_sum_radius_v2(u, R2, rho, ord, g, prec);
-    arf_min(R2, R2, u);
+    if (use_dhbhs)
+    {
+        acb_theta_sum_radius_v2(u, R2, rho, ord, g, prec);
+        arf_min(R2, R2, u);
+    }
 
     /* Set error 2^(-prec) */
     arf_one(eps);

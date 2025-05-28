@@ -737,14 +737,15 @@ then
 
 where `\rho` denotes the norm of the shortest nonzero vector in `C \mathbb{Z}^g`.
 
-.. function:: void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho, slong ord, slong prec)
+.. function:: void acb_theta_sum_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho, slong ord, slong prec, int use_dhbhs)
 
     Sets *eps* to `2^{-\mathit{prec}}` and chooses *R2* such that one of the
     above upper bounds for *R2* and the given *ord* is at most *eps*, where `C`
     is *cho*. When *ord = 0*, the square root of *R2* is a suitable ellipsoid
     radius for a partial sum of the theta series, and *eps* is an upper bound
     on the absolute value of the tail of the series defining
-    `\widetilde{\theta}_{a,b}`.
+    `\widetilde{\theta}_{a,b}`. If *use_dhbhs* is false, then only the first of
+    the two above upper bounds is used.
 
 .. function:: void acb_theta_sum_jet_radius(arf_t R2, arf_t eps, const arb_mat_t cho, const arb_t rho, arb_srcptr v, slong ord, slong prec)
 
@@ -786,13 +787,14 @@ where `\rho` denotes the norm of the shortest nonzero vector in `C \mathbb{Z}^g`
     *eps* when `R` is the square root of *R2*.
 
     To obtain them, we first compute *R2* and *eps* using
-    :func:`acb_theta_sum_radius` with *ord* = 0. If `R\leq \lVert
-    Y^{-1}y\rVert_\infty/\lVert C^{-1}\rVert_\infty`, we simply multiply *eps*
-    by `\max\{1, 2 \lVert Y^{-1}y \rVert_\infty\}^{\mathit{ord}}`. Otherwise,
-    we compute *R2* and *eps* using :func:`acb_theta_sum_radius` with the given
-    value of *ord*. We can then set *R2* to the maximum of *R2* and `\lVert
-    Y^{-1}y \rVert_\infty /\lVert C^{-1} \rVert_\infty`, and multiply *eps* by
-    `\max\{1, 2\lVert C^{-1}\rVert_\infty\}^{\mathit{ord}}`.
+    :func:`acb_theta_sum_radius` with *ord* = 0 and *use_dhbhs* = 0. If `R\leq
+    \lVert Y^{-1}y\rVert_\infty/\lVert C^{-1}\rVert_\infty`, we simply multiply
+    *eps* by `\max\{1, 2 \lVert Y^{-1}y
+    \rVert_\infty\}^{\mathit{ord}}`. Otherwise, we compute *R2* and *eps* using
+    :func:`acb_theta_sum_radius` with the given value of *ord*. We can then set
+    *R2* to the maximum of *R2* and `\lVert Y^{-1}y \rVert_\infty /\lVert
+    C^{-1} \rVert_\infty`, and multiply *eps* by `\max\{1, 2\lVert
+    C^{-1}\rVert_\infty\}^{\mathit{ord}}`.
 
 .. function:: void acb_theta_sum_term(acb_t res, acb_srcptr z, const acb_mat_t tau, slong * tup, slong * n, slong prec)
 

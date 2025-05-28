@@ -69,7 +69,7 @@ TEST_FUNCTION_START(acb_theta_sum_radius, state)
         arb_mat_vector_mul_col(v, cho, v, prec);
 
         acb_theta_eld_shortest(rho, cho, mprec);
-        acb_theta_sum_radius(R2, eps, cho, rho, 0, mprec);
+        acb_theta_sum_radius(R2, eps, cho, rho, 0, mprec, 1);
         arb_mul_arf(u, u, eps, prec);
 
         /* Test: sum of terms on the border of ellipsoid is less than u */
