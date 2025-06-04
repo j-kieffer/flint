@@ -134,7 +134,7 @@ Example of usage
 -------------------------------------------------------------------------------
 
 The following code snippet constructs the period matrix `\tau = iI_2` for `g =
-2`, computes the associated theta values at `z = 0` at 100000 bits of precision
+2`, computes the associated theta values at `z = 0` at 10000 bits of precision
 in less than 10 ms, and prints them.
 
 .. code-block:: c
