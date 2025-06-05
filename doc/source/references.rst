@@ -107,7 +107,7 @@ References
 
 .. [EM2004] \O. Espinosa and V. Moll, "A generalized polygamma function", Integral Transforms and Special Functions (2004), 101-115.
 
-.. [EK2025] \N. D. Elkies and J. Kieffer, "A uniform quasi-linear time algorithm for evaluating theta functions in any dimension", in preparation.
+.. [EK2025] \N. D. Elkies and J. Kieffer, "Fast evaluation of Riemann theta functions in any dimension", preprint (2025), https://arxiv.org/pdf/2505.22382
 
 .. [Fie2007] \C. Fieker, "Sparse representation for cyclotomic fields". Experiment. Math. Volume 16, Issue 4 (2007), 493-500. https://doi.org/10.1080/10586458.2007.10129012
 
