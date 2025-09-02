@@ -310,7 +310,8 @@ sp2gz_decompose_nonsimplified(slong * nb, const fmpz_mat_t mat)
     return res;
 }
 
-fmpz_mat_struct * sp2gz_decompose(slong * nb, const fmpz_mat_t mat)
+fmpz_mat_struct *
+sp2gz_decompose(slong * nb, const fmpz_mat_t mat)
 {
     slong g = sp2gz_dim(mat);
     fmpz_mat_struct * rec;
